@@ -80,6 +80,7 @@ bool GameLayer::init(){
     m_exitLayer = nullptr;
     m_targetshowLayer = nullptr;
     m_targetAssemble = nullptr;
+    m_map = nullptr;
     //数据初始化
     visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
     return true;
@@ -104,11 +105,11 @@ void GameLayer::onEnterTransitionDidFinish(){
     CKF_Sound::playBackGround("bgMusic");
     //读取配置文件 配置配置文件数据
     this->analyzeCoinfig();
-    
+    //vector 数据的初始化
     if(!m_BallOrdinaryMap){
         m_BallOrdinaryMap = new(std::nothrow) std::unordered_map<int,std::vector<BallOrdinary*>*>();
         m_BallOrdinaryMap->reserve(BALLTYPECOUNT); //5种球
-        for(int i =0;i<BALLTYPECOUNT;i++){
+        for(int i = 0;i<BALLTYPECOUNT;i++){
             auto ballVec =  new(std::nothrow) std::vector<BallOrdinary*>();
             ballVec->reserve(MAXBALLCOUNT/2);//初始一个容器大小
             m_BallOrdinaryMap->insert(std::pair<int,std::vector<BallOrdinary*>*>(i+1,ballVec));
@@ -548,11 +549,11 @@ void GameLayer::onExit(){
 void GameLayer::analyzeTileMap(){
     //地图 TMXTiledMap anchorPoint 在 0,0
     m_map = cocos2d::TMXTiledMap::create(cocos2d::StringUtils::format("ui/tmx/tmx%d/%s",m_data.ThemeID,m_data.TiledName.c_str()));
+    this->addChild(m_map);
     m_Map_point = DESIGN_TO_DESIGN(25, TMX_OFFSET);
     m_map->setPosition(DESIGN_TO_DESIGN(25,TMX_OFFSET + m_map->getContentSize().height));
-    this->addChild(m_map);
     
-    m_needRemoveNodeVec.push_back(m_map);//需要在离开场景时移除m_map
+   // m_needRemoveNodeVec.push_back(m_map);//需要在离开场景时移除m_map
     //创建物理墙
     
     cocos2d::Size size = m_map->getMapSize();
