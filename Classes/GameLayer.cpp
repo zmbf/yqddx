@@ -28,9 +28,9 @@ cocos2d::Scene* GameLayer::createScene(const CKF_GameData& _data)
     //开场动画
     if (false&&cocos2d::UserDefault::getInstance()->getIntegerForKey("OpenAnimationLayer",0) == 0 &&( _data.GeneralID == 1|| _data.GeneralID == 5))
     {
-         auto OpenAnimationLayer = OpenAnimationLayer::create();
-         OpenAnimationLayer->setEndCallFunc(createGameLayerFunc);
-         scene->addChild(OpenAnimationLayer);
+        auto OpenAnimationLayer = OpenAnimationLayer::create();
+        OpenAnimationLayer->setEndCallFunc(createGameLayerFunc);
+        scene->addChild(OpenAnimationLayer);
     }else{
         createGameLayerFunc();
     }
@@ -136,7 +136,7 @@ void GameLayer::onEnterTransitionDidFinish(){
     
     //顶部UI 目标数据初始化
     initTargetUI();
-  
+    
     //初始化地图信息（地图框等）
     this->analyzeTileMap();
     
@@ -163,7 +163,7 @@ void GameLayer::onEnterTransitionDidFinish(){
         m_touchListen->onTouchEnded = CC_CALLBACK_2(GameLayer::onTouchEnded,this);
         m_touchListen->onTouchCancelled = CC_CALLBACK_2(GameLayer::onTouchCancelled,this);
         _eventDispatcher->addEventListenerWithSceneGraphPriority(m_touchListen, this);
-
+        
         m_pauseButton->setTouchEnabled(false);
         m_pauseButton->setTouchEnabled(true);
     }else{
@@ -200,7 +200,7 @@ void GameLayer::analyzeCoinfig(){
     auto scene = cocos2d::FileUtils::getInstance()->getValueMapFromFile(m_data.ThemeName);
     auto scene_config = scene[cocos2d::StringUtils::format("%d",m_data.ThemeID)].asValueMap();
     //背景图片名字
-   // bgName = scene_config["background"].asString() = "ui/textures/DDD_ditu2.png";
+    // bgName = scene_config["background"].asString() = "ui/textures/DDD_ditu2.png";
     aboveBgName = scene_config["aboveground"].asString();
     midBgName = scene_config["midground"].asString();
 }
@@ -208,8 +208,8 @@ void GameLayer::initUI(){
     auto bg = Sprite::create("ui/textures/DDD_ditu2.png");
     this->addChild(bg);
     bg->setPosition(visibleSize.width*0.5,visibleSize.height*0.5);
-//    auto midBg = static_cast<cocos2d::ui::Layout*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile(midBgName.c_str()));
-//    this->addChild(midBg);
+    //    auto midBg = static_cast<cocos2d::ui::Layout*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile(midBgName.c_str()));
+    //    this->addChild(midBg);
     
     //顶部UI
     m_root = static_cast<cocos2d::ui::Layout*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile(aboveBgName.c_str()));
@@ -340,7 +340,7 @@ bool GameLayer::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event){
                 for(auto & ball : *m_BallOrdinarySelect){
                     ball->setIsSelect(true);
                 }
-              return true;
+                return true;
             }
         }
     }
@@ -480,7 +480,7 @@ void GameLayer::ballSelectHelp(float dt){
         getlinkBallVec(*selectHelpVec);
     }
     for(auto & ball:*selectHelpVec){
-       ball->setIsSelect(true); //提示也用select图片了
+        ball->setIsSelect(true); //提示也用select图片了
     }
     this->scheduleOnce(schedule_selector(GameLayer::ballSelectHelpClose),1.0f);
 }
@@ -608,44 +608,44 @@ void GameLayer::analyzeTileMap(){
     m_mapWidth_Right =  visibleSize.width;
     //底部
     if(isFirstInser){
-    cocos2d::Vec2 p1 = cocos2d::Vec2::ZERO;
-    cocos2d::Vec2 p2 = cocos2d::Vec2(visibleSize.width, 0);
-    auto node1 = Node::create();
-    auto body1 = cocos2d::PhysicsBody::createEdgeSegment(p1, p2);
-    body1->setName("wall_1");
-    node1->setPhysicsBody(body1);
-    node1->setPosition(DESIGN_TO_DESIGN(12, TMX_OFFSET));
-    this->addChild(node1, c_mUiLocalZorder - 1);
-    //右
-    p1 = cocos2d::Vec2(visibleSize.width, 0);
-    p2 = cocos2d::Vec2(visibleSize.width, visibleSize.height);
-    auto node2 = cocos2d::Node::create();
-    auto body2 = cocos2d::PhysicsBody::createEdgeSegment(p1, p2);
-    body2->setName("wall_2");
-    node2->setPhysicsBody(body2);
-    node2->setPosition(DESIGN_TO_DESIGN(12, TMX_OFFSET));
-    this->addChild(node2, c_mUiLocalZorder - 1);
-    //上
-    p1 = cocos2d::Vec2(visibleSize.width, visibleSize.height);
-    p2 = cocos2d::Vec2(0, visibleSize.height);
-    auto node3 = cocos2d::Node::create();
-    auto body3 = cocos2d::PhysicsBody::createEdgeSegment(p1, p2);
-    body3->setName("wall_3");
-    node3->setPhysicsBody(body3);
-    node3->setPosition(DESIGN_TO_DESIGN(12, TMX_OFFSET));
-    this->addChild(node3, c_mUiLocalZorder);
-    //左
-    p1 = cocos2d::Vec2(0, visibleSize.height);
-    p2 = cocos2d::Vec2(0, 0);
-    auto node4 = cocos2d::Node::create();
-    auto body4 = cocos2d::PhysicsBody::createEdgeSegment(p1, p2);
-    body4->setName("wall_4");
-    node4->setPhysicsBody(body4);
-    node4->setPosition(DESIGN_TO_DESIGN(12, TMX_OFFSET));
-    this->addChild(node4, c_mUiLocalZorder - 1);
-     }
-   
-   
+        cocos2d::Vec2 p1 = cocos2d::Vec2::ZERO;
+        cocos2d::Vec2 p2 = cocos2d::Vec2(visibleSize.width, 0);
+        auto node1 = Node::create();
+        auto body1 = cocos2d::PhysicsBody::createEdgeSegment(p1, p2);
+        body1->setName("wall_1");
+        node1->setPhysicsBody(body1);
+        node1->setPosition(DESIGN_TO_DESIGN(12, TMX_OFFSET));
+        this->addChild(node1, c_mUiLocalZorder - 1);
+        //右
+        p1 = cocos2d::Vec2(visibleSize.width, 0);
+        p2 = cocos2d::Vec2(visibleSize.width, visibleSize.height);
+        auto node2 = cocos2d::Node::create();
+        auto body2 = cocos2d::PhysicsBody::createEdgeSegment(p1, p2);
+        body2->setName("wall_2");
+        node2->setPhysicsBody(body2);
+        node2->setPosition(DESIGN_TO_DESIGN(12, TMX_OFFSET));
+        this->addChild(node2, c_mUiLocalZorder - 1);
+        //上
+        p1 = cocos2d::Vec2(visibleSize.width, visibleSize.height);
+        p2 = cocos2d::Vec2(0, visibleSize.height);
+        auto node3 = cocos2d::Node::create();
+        auto body3 = cocos2d::PhysicsBody::createEdgeSegment(p1, p2);
+        body3->setName("wall_3");
+        node3->setPhysicsBody(body3);
+        node3->setPosition(DESIGN_TO_DESIGN(12, TMX_OFFSET));
+        this->addChild(node3, c_mUiLocalZorder);
+        //左
+        p1 = cocos2d::Vec2(0, visibleSize.height);
+        p2 = cocos2d::Vec2(0, 0);
+        auto node4 = cocos2d::Node::create();
+        auto body4 = cocos2d::PhysicsBody::createEdgeSegment(p1, p2);
+        body4->setName("wall_4");
+        node4->setPhysicsBody(body4);
+        node4->setPosition(DESIGN_TO_DESIGN(12, TMX_OFFSET));
+        this->addChild(node4, c_mUiLocalZorder - 1);
+    }
+    
+    
     //create cliping node
     //创建裁剪范围
     cocos2d::TMXObjectGroup* effect = m_map->getObjectGroup("effect"); //方形框
