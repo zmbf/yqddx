@@ -191,7 +191,7 @@ void GameLayer::analyzeCoinfig(){
     cocos2d::ValueMap data = cocos2d::FileUtils::getInstance()->getValueMapFromFile(m_data.GeneralName);
     cocos2d::ValueMap mission_config =data[cocos2d::StringUtils::format("%d",m_data.GeneralID).c_str()].asValueMap();
     m_ball_count = mission_config["ball_count"].asInt();  //本关全屏总球数
-    m_iStep = mission_config["touch_number"].asInt();
+    m_step = mission_config["touch_number"].asInt();
     for(int i =0;i<BALLTYPECOUNT;i++){
         m_ballCountMaxPer[i] = mission_config[cocos2d::StringUtils::format("ball_%d_max",i+1)].asFloat();
         m_ballCountMinPer[i] = mission_config[cocos2d::StringUtils::format("ball_%d_min",i+1)].asFloat();
@@ -232,6 +232,9 @@ void GameLayer::initUI(){
     m_scoreLabel = static_cast<cocos2d::ui::TextAtlas*>(image->getChildByName("AtlasLabel_Score"));
     m_scoreLabel->setString("0");
     image =static_cast<cocos2d::ui::ImageView*>(m_root->getChildByName("Image_Frame_6"));
+    m_touchAtlas = static_cast<cocos2d::ui::TextAtlas*>(image->getChildByName("AtlasLabel_Step Number"));
+    m_touchAtlas->setString(cocos2d::StringUtils::format("%d",this->getStep()));
+    //关卡id
     auto lv = static_cast<cocos2d::ui::TextAtlas*>(image->getChildByName("AtlasLabel_1"));
     lv->setString(cocos2d::StringUtils::format("%d",m_data.GeneralID));
     // 底部UI
@@ -357,6 +360,9 @@ void GameLayer::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event){
 void GameLayer::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event){
     this->schedule(schedule_selector(GameLayer::ballSelectHelp), 5,CC_REPEAT_FOREVER,5);
     if(m_BallOrdinarySelect->size()>1){ //大于1个球  并且手指未离开第一个球
+        //步数减一
+        this->setStep(this->getStep()-1);
+        
         //计算可以得的分数
         int score = 20;
         for(int i = 3;i <= m_BallOrdinarySelect->size();i++){ //需要 = 于size
@@ -382,6 +388,10 @@ void GameLayer::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event){
     }else{
         this->selectCancelled();
     }
+}
+void GameLayer::setStep(const int & step){
+    m_step = step;
+    m_touchAtlas->setString(cocos2d::StringUtils::format("%d",m_step));
 }
 void GameLayer::onTouchCancelled(cocos2d::Touch* touch, cocos2d::Event* event){
     this->selectCancelled();
@@ -440,7 +450,7 @@ void GameLayer::showEncourageWord(int id){
     auto spawn = cocos2d::Spawn::create(fadeIn,move,nullptr);
     word->runAction(cocos2d::Sequence::create(spawn,cocos2d::FadeOut::create(0.5f),nullptr));
 }
-void GameLayer::supplyBall(int count){
+void GameLayer::supplyBall(const int & count){
     for(int i = 0;i<count;i++){
         cocos2d::Vec2 pos ;
         if(m_mapWidth_left <= 0 && m_mapWidth_Right <= 0){
