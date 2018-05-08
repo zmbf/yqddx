@@ -35,8 +35,47 @@ cocos2d::Animation* ToolFunction::createFrameAnimation(int indexStar,int indexEn
     }
     animation->setDelayPerUnit(perUnit);
     animation->setRestoreOriginalFrame(isRestoreOriginalFrame);
-    if(nameForSave.compare("")){//存在保存名字
+    if(nameForSave.compare("")){//不是""则保存名字
         cocos2d::AnimationCache::getInstance()->addAnimation(animation,nameForSave);
     }
     return animation;
 }
+inline void ToolFunction::calculateDeltaTimeFunc(std::string id){
+#if COCOS2D_DEBUG > 0
+    auto now = std::chrono::steady_clock::now();
+    auto _deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(now - _lastUpdate).count();
+    cocos2d::log("timeDelta  %s :  %lld",id.c_str(),_deltaTime);
+    _lastUpdate = now;
+#endif
+}
+cocos2d::BezierTo* ToolFunction::getBzier(cocos2d::Vec2 _startPoint, cocos2d::Vec2 _endPoint,int height,float deltime){
+    cocos2d::ccBezierConfig cfg;
+    
+    float p1_X =(_startPoint.x -400)+(rand()%9) * 20;
+    
+    if(p1_X > cocos2d::Director::getInstance()->getVisibleSize().width){
+        p1_X = cocos2d::Director::getInstance()->getVisibleSize().width - 100;
+    }
+    
+    float p2_X = (_startPoint.x +600)+(rand()%9) * 20;
+    
+    if(p2_X > cocos2d::Director::getInstance()->getVisibleSize().width){
+        p1_X =  p1_X = cocos2d::Director::getInstance()->getVisibleSize().width - 100;
+    }
+    cfg.controlPoint_1 = cocos2d::Vec2( p1_X, _startPoint.y + 100+height );
+    cfg.controlPoint_2 = cocos2d::Vec2( p1_X, _startPoint.y + 200+height );
+    cfg.endPosition =_endPoint;
+    auto bezierto =  cocos2d::BezierTo::create(deltime, cfg);
+    return bezierto;
+}
+
+
+
+
+
+
+
+
+
+
+

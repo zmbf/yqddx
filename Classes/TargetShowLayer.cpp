@@ -26,11 +26,10 @@ void TargetShowLayer::onEnterTransitionDidFinish(){
          setVisible(false);
          m_btnFull->addClickEventListener(CC_CALLBACK_0(TargetShowLayer::onBtnClose,this));
     }
-    //cleanup() 造成的小bug 重新注册点击事件
     m_btnFull->setTouchEnabled(false);
-    m_btnFull->setTouchEnabled(true);
 }
 void TargetShowLayer::onBtnClose(){
+    m_btnFull->setTouchEnabled(false);
     auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("aimBroad/Blue_Internal_4.json", "Animation0");
     act->play(cocos2d::CallFunc::create([this](){
         this->setVisible(false);
@@ -65,6 +64,8 @@ void TargetShowLayer::onShow(std::map<std::string, sXDLCMissionSuccessCondition>
     }
 
     auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("aimBroad/Blue_Internal_4.json", "Animation1");
-    act->play();
+    act->play(cocos2d::CallFunc::create([=](){
+        m_btnFull->setTouchEnabled(true);
+    }));
 }
 

@@ -19,16 +19,11 @@ float DESIGNX_TO_DESIGNX(float x);
 class ToolFunction{
 public:
     static cocos2d::Animation* createFrameAnimation(int indexStar/* 开始下标*/,int indexEnd/*结束下标*/,std::string urlFormat /* format字符串 */,std::string nameForSave = ""/*保存的名字 有名字保存 没名字不保存 */,float perUnit=0.1f /*每一帧时间*/ ,bool isRestoreOriginalFrame = true /* 是否返回到第一帧 */);
-    static inline void calculateDeltaTimeFunc(std::string id){ //前一次调用到本次调用的耗时
-#if COCOS2D_DEBUG > 0
-        auto now = std::chrono::steady_clock::now();
-        auto _deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(now - _lastUpdate).count();
-        cocos2d::log("timeDelta  %s :  %lld",id.c_str(),_deltaTime);
-        _lastUpdate = now;
-#endif
-    };
+    static inline void calculateDeltaTimeFunc(std::string id); //前一次调用到本次调用的耗时
+    static cocos2d::BezierTo* getBzier(cocos2d::Vec2 _startPoint, cocos2d::Vec2 _endPoint,int height,float deltime);
 private:
     static std::chrono::steady_clock::time_point _lastUpdate;
+    
 };
 
 
