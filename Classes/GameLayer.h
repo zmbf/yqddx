@@ -23,8 +23,10 @@ private:
     void initUI();//加载显示的UI
     void initTargetUI(); //目标数据初始化
     void analyzeTileMap();//解析地图
-    void supplyBall(int count = 1);//补充球
+    void supplyBall(const int & count = 1);//补充球
     int getRandBallType();  //随机一个球 type
+    void setStep(const int & step); //设置步数
+    inline const int & getStep(){return m_step;};//获取步数
     bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
     void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
     void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);
@@ -71,7 +73,7 @@ private:
     CKF_GameData m_data;
     //配置读取数据
     int m_ball_count;  //总的球数
-    int m_iStep;       //步数
+    int m_step;       //步数
     std::vector<int> m_mission_types; //步数
     float m_ballCountMaxPer[5]; //生成球的两个百分比
     float m_ballCountMinPer[5];
@@ -105,7 +107,7 @@ private:
     cocos2d::ui::Layout* m_root; //上部UI
     cocos2d::ui::Layout* m_bottom;  //下部UI
     cocos2d::ui::TextAtlas* m_scoreLabel;  //分数 TextAtlas
-    
+    cocos2d::ui::TextAtlas* m_touchAtlas;  //点击数
     //float  m_mapWidth_left;
     //float  m_mapWidth_Right;
     
