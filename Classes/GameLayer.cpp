@@ -5,7 +5,7 @@
 #include "ToolFunction.h"
 #include "cocos/physics3d/CCPhysics3DWorld.h"
 #include "JsonActionLayer.h"
-
+#include "JsonEffectFactory.h"
 GameLayer * GameLayer::m_gameLayer = nullptr;
 cocos2d::Scene* GameLayer::createScene(const CKF_GameData& _data)
 {
@@ -63,7 +63,10 @@ GameLayer::~GameLayer(){
     selectHelpVec = nullptr ;
     delete m_BallOrdinarySelect;
     m_BallOrdinarySelect = nullptr;
-    delete [] m_targetAssemble;
+    for(auto & target : * m_targetAssemble){
+        delete target;
+    }
+    delete m_targetAssemble;
     m_targetAssemble = nullptr;
 }
 bool GameLayer::init(){
@@ -76,6 +79,12 @@ bool GameLayer::init(){
         auto ballVec =  new(std::nothrow) std::vector<BallOrdinary*>();
         ballVec->reserve(MAXBALLCOUNT/2);//初始一个容器大小
         m_BallOrdinaryMap->at(i) = ballVec;
+    }
+   // eliminateActVec->resize(MAXBALLCOUNT);
+    for(int i =0; i< MAXBALLCOUNT; i++){
+       // eliminateActVec->at(i);
+        auto node = cocostudio::GUIReader::getInstance()->widgetFromJsonFile("effect/ballEliminate/putongqiutexiao.json");
+        
     }
     m_BallOrdinarySelect = new(std::nothrow) std::vector<BallOrdinary*>();
     m_BallOrdinarySelect->reserve(MAXBALLCOUNT/2); //初始一个容器大小
@@ -96,6 +105,9 @@ bool GameLayer::init(){
     visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
     //ui
     initUI();
+    //初始化移除球效果
+    JsonEffectFactory::initBalleliminateAct(MAXBALLCOUNT);
+    
     //目标板
     m_targetshowLayer = TargetShowLayer::create();
     m_targetshowLayer->retain();
@@ -117,7 +129,7 @@ void GameLayer::onEnterTransitionDidFinish(){
 #endif
     if(!m_targetAssemble){
         //目前只有三个目标
-        m_targetAssemble = new(std::nothrow) targetAssemble[m_missionSuccess.size()];
+        m_targetAssemble = new(std::nothrow) std::vector<targetAssemble*>(m_missionSuccess.size());
     }
     //播放背景音
     CKF_Sound::playBackGround("bgMusic");
@@ -220,33 +232,33 @@ void GameLayer::initTargetUI(){
     //目标数据初始化
     int i = 0;
     for(auto & condition : m_missionSuccess){
-        targetAssemble target = targetAssemble();
-        target.image = static_cast<cocos2d::ui::ImageView*>(m_root->getChildByName(cocos2d::StringUtils::format("Image_Frame_%d",i+3))->getChildByName(cocos2d::StringUtils::format("Image_%d",i+1)));
-        target.number = static_cast<cocos2d::ui::TextAtlas*>(m_root->getChildByName(cocos2d::StringUtils::format("Image_Frame_%d",i+3))->getChildByName("AtlasLabel_1"));
-        target.reachImage = static_cast<cocos2d::ui::ImageView*>(m_root->getChildByName(cocos2d::StringUtils::format("Image_Frame_%d",i+3))->getChildByName(cocos2d::StringUtils::format("Image_2%d",i+3)));
+        targetAssemble* target =new targetAssemble();
+        target->image = static_cast<cocos2d::ui::ImageView*>(m_root->getChildByName(cocos2d::StringUtils::format("Image_Frame_%d",i+3))->getChildByName(cocos2d::StringUtils::format("Image_%d",i+1)));
+        target->number = static_cast<cocos2d::ui::TextAtlas*>(m_root->getChildByName(cocos2d::StringUtils::format("Image_Frame_%d",i+3))->getChildByName("AtlasLabel_1"));
+        target->reachImage = static_cast<cocos2d::ui::ImageView*>(m_root->getChildByName(cocos2d::StringUtils::format("Image_Frame_%d",i+3))->getChildByName(cocos2d::StringUtils::format("Image_2%d",i+3)));
        
         
-        target.number->setString(condition.second.limitedValue.c_str());
-        target.reachImage->setVisible(false);
+        target->number->setString(condition.second.limitedValue.c_str());
+        target->reachImage->setVisible(false);
         if(!condition.second.valueVar.compare("RedCount")){
-            target.ballType = 1;
+            target->ballType = 1;
         }else if(!condition.second.valueVar.compare("YellowCount")){
-            target.ballType = 2;
+            target->ballType = 2;
         }else if(!condition.second.valueVar.compare("BlueCount")){
-            target.ballType = 3;
+            target->ballType = 3;
         }else if(!condition.second.valueVar.compare("GreenCount")){
-            target.ballType = 4;
+            target->ballType = 4;
         }else if(!condition.second.valueVar.compare("PurpleCount")){
-            target.ballType = 5;
+            target->ballType = 5;
         }
-        std::string fileName = cocos2d::StringUtils::format("ball%d-1.png", target.ballType);
+        std::string fileName = cocos2d::StringUtils::format("ball%d-1.png", target->ballType);
         auto frame = cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(fileName);
         if(frame){
-            target.image->loadTexture(fileName,cocos2d::ui::TextureResType::PLIST);
+            target->image->loadTexture(fileName,cocos2d::ui::TextureResType::PLIST);
         }else{
-            target.image->loadTexture(fileName);
+            target->image->loadTexture(fileName);
         }
-         m_targetAssemble[i] = target;
+        m_targetAssemble->at(i) =  target;
         i++;//下标增加1
     }
 }
@@ -296,29 +308,28 @@ float GameLayer::removeSelectBall(std::vector<BallOrdinary*> & vec){
             delayTime += delay;
             delay = delay>0.05?delay-0.01:0.05;//延时逐级 减0.01 不低于0.05
             ball->runAction(cocos2d::Spawn::create(cocos2d::Sequence::create(cocos2d::DelayTime::create(delayTime),cocos2d::CallFunc::create([=](){
-                for(int i = 0;i<sizeof(m_targetAssemble[0])/sizeof(m_targetAssemble);i++){
-                    auto & target = m_targetAssemble[i];
+                for(auto & target : * m_targetAssemble){
                     //目标数减一
-                    if(ball->getType()==target.ballType){
+                    if(ball->getType()==target->ballType){
                        
-                        auto  count = std::atoi(target.number->getString().c_str());
+                        auto  count = std::atoi(target->number->getString().c_str());
                       
                         if(count > 0){
                             //飞向 目标动作
-                            std::string fileName = cocos2d::StringUtils::format("ball%d-1.png",target.ballType);
+                            std::string fileName = cocos2d::StringUtils::format("ball%d-1.png",target->ballType);
                             auto sp = Sprite::create(fileName);
                             this->addChild(sp,c_mUiLocalZorder);
                             sp->setPosition(ball->getPosition());
-                            auto bezierto = ToolFunction::getBzier(sp->getPosition(),target.image->getParent()->convertToWorldSpace(target.image->getPosition()),0,1.0f);
+                            auto bezierto = ToolFunction::getBzier(sp->getPosition(),target->image->getParent()->convertToWorldSpace(target->image->getPosition()),0,1.0f);
                             sp->runAction(cocos2d::Sequence::create(bezierto,cocos2d::DelayTime::create(0.1f),cocos2d::RemoveSelf::create(),nullptr));
-                            target.number->setString(cocos2d::StringUtils::format("%d",count-1));
-                            if(count-1==0){
-                                 target.reachImage->setVisible(true);
+                            target->number->setString(cocos2d::StringUtils::format("%d",count-1));
+                            if(count==1){
+                                target->reachImage->setVisible(true);
                             }
                             //检测游戏是否胜利
                             for(int j = 0;j<sizeof(m_targetAssemble[0])/sizeof(m_targetAssemble);j++){
-                                auto & target = m_targetAssemble[j];
-                                if(!target.reachImage->isVisible()){
+                                auto & target = m_targetAssemble->at(j);
+                                if(!target->reachImage->isVisible()){
                                     break;
                                 }
                             }
@@ -327,7 +338,7 @@ float GameLayer::removeSelectBall(std::vector<BallOrdinary*> & vec){
                         break;
                     }
                 }
-                ball->boomAction([=](){
+                ball->eliminate([=](){
                     BallFactory::revertBall(ball);  //退回ball
                     this->supplyBall();             //补充ball
                 });
@@ -526,7 +537,7 @@ void GameLayer::showEncourageWord(int id){
     auto fadeIn = cocos2d::FadeIn::create(0.5);
     auto move = cocos2d::MoveBy::create(0.5f, cocos2d::Vec2(0,DESIGNY_TO_DESIGNY(200)));
     auto spawn = cocos2d::Spawn::create(fadeIn,move,nullptr);
-    word->runAction(cocos2d::Sequence::create(spawn,cocos2d::FadeOut::create(0.5f),nullptr));
+    word->runAction(cocos2d::Sequence::create(spawn,cocos2d::FadeOut::create(0.5f),cocos2d::RemoveSelf::create(),nullptr));
 }
 void GameLayer::supplyBall(const int & count){
     needAddBallCount+=count;
@@ -559,7 +570,9 @@ void GameLayer::update(float dt){
         auto ball = BallFactory::getBallOrdinary(type);
         m_BallOrdinaryMap->at(type)->push_back(ball);
         ball->setPosition(DESIGN_TO_DESIGN(pos));
-        m_ballBatchNode->addChild(ball);
+        if(ball->getParent()==nullptr){
+            m_ballBatchNode->addChild(ball);
+        }
     }
 }
 void GameLayer::ballSelectHelp(float dt){

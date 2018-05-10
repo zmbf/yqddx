@@ -60,13 +60,7 @@ private:
     bool isFirstInser;//是否第一次进入游戏
     static GameLayer * m_gameLayer;
     int needAddBallCount;
-    //目标组合
-    struct targetAssemble{
-        cocos2d::ui::ImageView* image;  //图片
-        cocos2d::ui::TextAtlas* number;//达成目标数
-        cocos2d::ui::ImageView* reachImage; //达成图片
-        int ballType;
-    } * m_targetAssemble;
+   
     std::map<std::string, sXDLCMissionSuccessCondition> m_missionSuccess;//目标完成条件map
     
     cocos2d::EventListenerKeyboard* m_keyListen;
@@ -122,6 +116,16 @@ private:
     std::vector<BallOrdinary*>* m_BallOrdinarySelect;                       //被选中的球集合
     std::vector<BallOrdinary*>* selectHelpVec;
     
+    std::vector<cocostudio::ActionObject*>* eliminateActVec;//
+    
+    //目标组合
+    struct targetAssemble{
+        cocos2d::ui::ImageView* image;  //图片
+        cocos2d::ui::TextAtlas* number;//达成目标数
+        cocos2d::ui::ImageView* reachImage; //达成图片
+        int ballType;
+    };
+    std::vector<targetAssemble*>* m_targetAssemble;
 };
 
 #endif // __GameLayer_SCENE_H__

@@ -7,6 +7,7 @@
 #include "BallOrdinary.h"
 #include "cocos/physics/CCPhysicsShape.h"
 #include "CKF_Sound.h"
+#include "JsonEffectFactory.h"
 BallOrdinary* BallOrdinary::create(const int & type)
 {
     BallOrdinary * ballOrdinary = new (std::nothrow) BallOrdinary();
@@ -19,6 +20,7 @@ BallOrdinary* BallOrdinary::create(const int & type)
     return nullptr;
 }
 bool BallOrdinary::init(const int & type){
+    
     std::string fileName = cocos2d::StringUtils::format("ball%d-1.png",type);
     auto frame = cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(fileName);
     if(frame){
@@ -64,30 +66,40 @@ void BallOrdinary::helpAction(const bool & isHelp){
     }
     isInhelp = isHelp;
 }
-void BallOrdinary::boomAction(const std::function<void(void)> & callback){
+void BallOrdinary::eliminate(const std::function<void(void)> & callback){
     m_callFunc = callback;
-    Sprite* sp = static_cast<Sprite*>(this->getChildByName("boomLight"));
-    if(!sp){
-        std::string fileName = cocos2d::StringUtils::format("ball%d-3.png",m_type);
-        sp = Sprite::create(fileName);
-        sp->setScale(0.0f);
-        sp->setPosition(cocos2d::Vec2(this->getContentSize().width*0.5,this->getContentSize().height*0.5));
-        this->addChild(sp);
-        sp->setName("boomLight");
-    }else{
-        sp->setVisible(true);
-        sp->setScale(0.0f);
-    }
-    this->setOpacity(0);
+ //   this->runAction(<#cocos2d::Action *action#>)
+//    Sprite* sp = static_cast<Sprite*>(this->getChildByName("boomLight"));
+//    if(!sp){
+//        std::string fileName = cocos2d::StringUtils::format("ball%d-3.png",m_type);
+//        sp = Sprite::create(fileName);
+//        sp->setScale(0.0f);
+//        sp->setPosition(cocos2d::Vec2(this->getContentSize().width*0.5,this->getContentSize().height*0.5));
+//        this->addChild(sp);
+//        sp->setName("boomLight");
+//    }else{
+//        sp->setVisible(true);
+//        sp->setScale(0.0f);
+//    }
+//    this->setOpacity(0);
+    auto eliminateAct = JsonEffectFactory::getBalleliminateAct(this->getParent(),this->getLocalZOrder()+1);
+    eliminateAct->node->setPosition(this->getPosition());
     CKF_Sound::playEffect("01");
-    sp->runAction(cocos2d::Sequence::create(cocos2d::ScaleTo::create(0.5,2.0f),cocos2d::CallFuncN::create([=](Ref* ref){
-         this->setOpacity(255);
-        sp->setVisible(false);
-        this->setIsSelect(false);
+    this->runAction(cocos2d::Sequence::create(cocos2d::ScaleTo::create(0.4f,0.0f),cocos2d::CallFuncN::create([=](cocos2d::Ref*ref){
+        auto node = static_cast<cocos2d::Node*>(ref);
+        node->setVisible(false);
+        node->setScale(1.0f);
+        JsonEffectFactory::revertBalleliminateAct(eliminateAct);
         if(m_callFunc){
             m_callFunc();
         }
-    }), nullptr));
+    }),nullptr));
+    eliminateAct->actvec->at(m_type-1)->play();
+
+//    this->runAction(cocos2d::Sequence::create(cocos2d::DelayTime::create(0.3f),cocos2d::CallFuncN::create([=](Ref* ref){
+//
+//
+//    }), nullptr));
 }
 
 
