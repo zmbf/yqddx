@@ -134,17 +134,15 @@ void PauseLayer::goOnCallBack(void)
     CKF_Sound::playEffect(clickSound);
     auto gameLayer = static_cast<GameLayer*>(cocos2d::Director::getInstance()->getRunningScene()->getChildByName("gameLayer"));
     auto data = gameLayer->getData();
+    this->removeFromParent();
     auto scene = GameLayer::createScene(data);
     cocos2d::Director::getInstance()->replaceScene(scene);
 }
-
-
 void PauseLayer::onBtnClose(void)
 {
     CKF_Sound::playEffect(clickSound);
     this->runAction(cocos2d::Sequence::create(cocos2d::CallFunc::create([this](){
         this->removeFromParentAndCleanup(true);
-        cocos2d::Director::getInstance()->getRunningScene()->getChildByName("gameLayer")->resume();
     }), nullptr));
 }
 void PauseLayer::goHomeCallBack(){

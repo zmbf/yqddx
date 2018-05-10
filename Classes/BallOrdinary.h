@@ -7,7 +7,7 @@
 //普通球
 #ifndef BallOrdinary_hpp
 #define BallOrdinary_hpp
-#define BALLTYPECOUNT (5) //球种类数
+#define BALLTYPECOUNT (6) //球种类数+1 type是从1开始的
 #define MAXBALLCOUNT (80) //最多80个球
 #include "Sprite.h"
 class BallOrdinary : public Sprite{

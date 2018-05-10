@@ -22,10 +22,10 @@ void TargetShowLayer::onEnterTransitionDidFinish(){
              m_atlasAim[i] = static_cast<cocos2d::ui::TextAtlas*>(m_root->getChildByName("Image_mubiao")->getChildByName(cocos2d::StringUtils::format("AtlasLabel_%d",i+7)));
         }
          m_btnFull = static_cast<cocos2d::ui::Button*>( m_root->getChildByName("Button_quanpingguanbi"));
-         this->addChild( m_root);
-         setVisible(false);
          m_btnFull->addClickEventListener(CC_CALLBACK_0(TargetShowLayer::onBtnClose,this));
+         this->addChild( m_root);
     }
+    this->setVisible(false);
     m_btnFull->setTouchEnabled(false);
 }
 void TargetShowLayer::onBtnClose(){

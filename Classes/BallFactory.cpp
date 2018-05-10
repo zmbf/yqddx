@@ -6,22 +6,20 @@
 //
 
 #include "BallFactory.h"
-std::map<int,std::vector<BallOrdinary*>*>* BallFactory::m_BallOrdinaryMap = new(std::nothrow) std::map<int,std::vector<BallOrdinary*>*>();
+std::vector<std::list<BallOrdinary*>*>* BallFactory::m_BallOrdinaryMap = new(std::nothrow) std::vector<std::list<BallOrdinary*>*>(BALLTYPECOUNT);
 BallOrdinary* BallFactory::getBallOrdinary(const int & type){
     BallOrdinary* ball = nullptr;
-    auto itr = m_BallOrdinaryMap->find(type);//获取 这个type 的vector
-    if(itr == m_BallOrdinaryMap->end()){
+    auto list = m_BallOrdinaryMap->at(type);//获取 这个type 的vector
+    if(!list){
+        list = new(std::nothrow) std::list<BallOrdinary*>();
+        m_BallOrdinaryMap->at(type) = list;
+    }
+    if(list->empty()){
         ball = BallOrdinary::create(type);
         ball->retain();
     }else{
-        auto ballVec = (*itr).second;
-        if(ballVec->empty()){  //vector 为空 创建新球
-            ball = BallOrdinary::create(type);
-            ball->retain();
-        }else{                   //取球
-            ball = ballVec->back();
-            ballVec->pop_back();
-        }
+        ball = list->back();
+        list->pop_back();
     }
     ball->setVisible(true);
     ball->m_isInUse = true;
@@ -34,16 +32,10 @@ void BallFactory::revertBall(BallOrdinary * ball){
     ball->setIsSelect(false);
     ball->helpAction(false);
     ball->setVisible(false);
-    auto itr = m_BallOrdinaryMap->find(type);
-    if(itr == m_BallOrdinaryMap->end()){    //没有这个type 的vector
-        auto ballVec =new(std::nothrow) std::vector<BallOrdinary*>();
-        ballVec->reserve(40);//初始一个大小
-        m_BallOrdinaryMap->insert(std::pair<int,std::vector<BallOrdinary*>*>(type,ballVec));
-        ballVec->push_back(ball);
-    }else{
-        (*itr).second->push_back(ball);
-    }
     ball->m_isInUse = false;
-    ball->setPosition(cocos2d::Vec2(-1000,-1000));
+    ball->setVisible(false);
+    ball->setPosition(cocos2d::Vec2(10000,10000));
     ball->removeFromParent();
+    auto list = m_BallOrdinaryMap->at(type);
+    list->push_back(ball);
 }

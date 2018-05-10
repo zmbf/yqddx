@@ -14,6 +14,7 @@
 #include "PauseLayer.h"
 #include "TargetShowLayer.h"
 #include "GameOverShowLayer.h"
+#include <stdio.h>
 class GameLayer : public cocos2d::Layer
 {
 public:
@@ -58,7 +59,7 @@ private:
 private:
     bool isFirstInser;//是否第一次进入游戏
     static GameLayer * m_gameLayer;
-    
+    int needAddBallCount;
     //目标组合
     struct targetAssemble{
         cocos2d::ui::ImageView* image;  //图片
@@ -80,9 +81,7 @@ private:
     float m_ballCountMaxPer[5]; //生成球的两个百分比
     float m_ballCountMinPer[5];
     
-    std::string bgName;
-    std::string aboveBgName;
-    std::string midBgName;
+   
     // ParticleBatchNode
     // cocos2d::ParticleBatchNode* m_ball_par;
     // cocos2d::ParticleBatchNode* m_ice_par;
@@ -119,7 +118,7 @@ private:
     GameOverShowLayer * m_gameOverShowLayer;
     cocos2d::ui::Button* m_pauseButton; //暂停按钮
     TargetShowLayer * m_targetshowLayer;
-    std::unordered_map<int,std::vector<BallOrdinary*>*>* m_BallOrdinaryMap;  //地图上所有的球 key 是球 type
+    std::vector<std::vector<BallOrdinary*>*>* m_BallOrdinaryMap;  //地图上所有的球 key 是球 type
     std::vector<BallOrdinary*>* m_BallOrdinarySelect;                       //被选中的球集合
     std::vector<BallOrdinary*>* selectHelpVec;
     

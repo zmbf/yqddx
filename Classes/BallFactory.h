@@ -9,14 +9,14 @@
 #define BallFactory_hpp
 #include "BallOrdinary.h"
 #include "cocos2d.h"
-#include <map>
+#include <list>
 #include <vector>
 class BallFactory{
 public:
     static BallOrdinary* getBallOrdinary(const int & type); //取出一个球
     static void revertBall(BallOrdinary * ball);            //返回一个球
 private:
-    static std::map<int,std::vector<BallOrdinary*>*>* m_BallOrdinaryMap; //球map
+    static std::vector<std::list<BallOrdinary*>*>* m_BallOrdinaryMap; //球map
 };
 
 #endif /* BallFactory_hpp */
