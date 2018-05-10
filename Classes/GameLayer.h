@@ -13,6 +13,7 @@
 #include "AppDelegate.h"
 #include "PauseLayer.h"
 #include "TargetShowLayer.h"
+#include "GameOverShowLayer.h"
 class GameLayer : public cocos2d::Layer
 {
 public:
@@ -27,6 +28,7 @@ private:
     int getRandBallType();  //随机一个球 type
     void setStep(const int & step); //设置步数
     inline const int & getStep(){return m_step;};//获取步数
+    void gameSuccess();//游戏成功
     bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
     void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
     void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);
@@ -114,6 +116,7 @@ private:
     cocos2d::Node* m_ballBatchNode; //球的父节点  
     cocos2d::ui::Layout* m_exitLayer;  //退出界面
     PauseLayer* m_pauseLayer; //暂停界面
+    GameOverShowLayer * m_gameOverShowLayer;
     cocos2d::ui::Button* m_pauseButton; //暂停按钮
     TargetShowLayer * m_targetshowLayer;
     std::unordered_map<int,std::vector<BallOrdinary*>*>* m_BallOrdinaryMap;  //地图上所有的球 key 是球 type

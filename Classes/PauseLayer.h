@@ -19,7 +19,7 @@ public:
     CREATE_FUNC(PauseLayer);
 private:
     PauseLayer();
-    void onEnterTransitionDidFinish();
+    virtual void onEnterTransitionDidFinish();
     void goOnCallBack(void);
     void goHomeCallBack(void);
     void onBtnClose(void);

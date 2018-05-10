@@ -78,6 +78,7 @@ bool GameLayer::init(){
     m_touchListen = nullptr;
     m_pauseLayer = nullptr;
     m_exitLayer = nullptr;
+    m_gameOverShowLayer = nullptr;
     m_targetshowLayer = nullptr;
     m_targetAssemble = nullptr;
     m_map = nullptr;
@@ -148,34 +149,24 @@ void GameLayer::onEnterTransitionDidFinish(){
     }) ,NULL) );
     //开启UPDATE
     this->scheduleUpdate();
+    //开启定时提示
     this->schedule(schedule_selector(GameLayer::ballSelectHelp), 5,CC_REPEAT_FOREVER,5);
     //不是第一次进入游戏 事件需要重新注册(cleanup 造成的)
     if(!isFirstInser){
-        _eventDispatcher->removeEventListener(m_keyListen);
-        m_keyListen = cocos2d::EventListenerKeyboard::create();
-        m_keyListen->onKeyReleased = CC_CALLBACK_2(GameLayer::onKeyReleased,this);
-        _eventDispatcher->addEventListenerWithSceneGraphPriority(m_keyListen, this);
-        
-        _eventDispatcher->removeEventListener(m_touchListen);
-        m_touchListen = cocos2d::EventListenerTouchOneByOne::create();
-        m_touchListen->setSwallowTouches(false);//
-        m_touchListen->onTouchBegan = CC_CALLBACK_2(GameLayer::onTouchBegan,this);
-        m_touchListen->onTouchMoved = CC_CALLBACK_2(GameLayer::onTouchMoved,this);
-        m_touchListen->onTouchEnded = CC_CALLBACK_2(GameLayer::onTouchEnded,this);
-        m_touchListen->onTouchCancelled = CC_CALLBACK_2(GameLayer::onTouchCancelled,this);
-        _eventDispatcher->addEventListenerWithSceneGraphPriority(m_touchListen, this);
-        
         m_pauseButton->setTouchEnabled(false);
         m_pauseButton->setTouchEnabled(true);
+        _eventDispatcher->addEventListenerWithSceneGraphPriority(m_keyListen, this);
+        cocos2d::Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(m_touchListen, this);
     }else{
-        
         //键盘监听
         m_keyListen = cocos2d::EventListenerKeyboard::create();
+        m_keyListen->retain();
         m_keyListen->onKeyReleased = CC_CALLBACK_2(GameLayer::onKeyReleased,this);
         _eventDispatcher->addEventListenerWithSceneGraphPriority(m_keyListen, this);
         
         //触控监听
         m_touchListen = cocos2d::EventListenerTouchOneByOne::create();
+        m_touchListen->retain();
         m_touchListen->setSwallowTouches(false);//
         m_touchListen->onTouchBegan = CC_CALLBACK_2(GameLayer::onTouchBegan,this);
         m_touchListen->onTouchMoved = CC_CALLBACK_2(GameLayer::onTouchMoved,this);
@@ -321,13 +312,15 @@ float GameLayer::removeSelectBall(std::vector<BallOrdinary*> & vec){
         if(itr != ballVec->end()){
             ballVec->erase(itr);     //从 m_BallOrdinaryMap 中移除
             delayTime += delay;
-            delay = delay>0.05?delay-0.01:0.05;
+            delay = delay>0.05?delay-0.01:0.05;//延时逐级 减0.01 不低于0.05
             ball->runAction(cocos2d::Spawn::create(cocos2d::Sequence::create(cocos2d::DelayTime::create(delayTime),cocos2d::CallFunc::create([=](){
                 for(int i = 0;i<sizeof(m_targetAssemble[0])/sizeof(m_targetAssemble);i++){
                     auto & target = m_targetAssemble[i];
-                    //目标减一
+                    //目标数减一
                     if(ball->getType()==target.ballType){
+                       
                         auto  count = std::atoi(target.number->getString().c_str());
+                      
                         if(count > 0){
                             //飞向 目标动作
                             std::string fileName = cocos2d::StringUtils::format("ball%d-1.png",target.ballType);
@@ -336,10 +329,20 @@ float GameLayer::removeSelectBall(std::vector<BallOrdinary*> & vec){
                             sp->setPosition(ball->getPosition());
                             auto bezierto = ToolFunction::getBzier(sp->getPosition(),target.image->getParent()->convertToWorldSpace(target.image->getPosition()),0,1.0f);
                             sp->runAction(cocos2d::Sequence::create(bezierto,cocos2d::DelayTime::create(0.1f),cocos2d::RemoveSelf::create(),nullptr));
-                            
-                        }else{
-                            target.reachImage->setVisible(true);
+                            target.number->setString(cocos2d::StringUtils::format("%d",count-1));
+                            if(count-1==0){
+                                 target.reachImage->setVisible(true);
+                            }
+                            //检测游戏是否胜利
+                            for(int j = 0;j<sizeof(m_targetAssemble[0])/sizeof(m_targetAssemble);j++){
+                                auto & target = m_targetAssemble[j];
+                                if(!target.reachImage->isVisible()){
+                                    break;
+                                }
+                            }
+                            //游戏胜利
                         }
+                        break;
                     }
                 }
                 ball->boomAction([=](){
@@ -379,6 +382,7 @@ void GameLayer::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event){
     this->selectCancelled();
 }
 void GameLayer::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event){
+    this->gameSuccess();
     this->schedule(schedule_selector(GameLayer::ballSelectHelp), 5,CC_REPEAT_FOREVER,5);
     if(m_BallOrdinarySelect->size()>1){ //大于1个球  并且手指未离开第一个球
         //步数减一
@@ -418,15 +422,67 @@ void GameLayer::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event){
         this->selectCancelled();
     }
 }
+void GameLayer::onTouchCancelled(cocos2d::Touch* touch, cocos2d::Event* event){
+    this->selectCancelled();
+}
+void GameLayer::gameSuccess(){
+    //取消touch监听
+    _eventDispatcher->removeEventListener(m_touchListen);
+    if(!m_gameOverShowLayer){
+        m_gameOverShowLayer = GameOverShowLayer::create();
+        m_gameOverShowLayer->retain();
+    }
+    this->addChild(m_gameOverShowLayer,c_mUiLocalZorder);
+    //步数变成奖励效果
+    int count = 0;
+    for(auto & vec : *m_BallOrdinaryMap){
+        count+=vec.second->size();
+    }
+    int i =0;
+    std::vector<BallOrdinary*> ballVec = std::vector<BallOrdinary*>();
+    ballVec.resize(count);
+    for(auto & vec : *m_BallOrdinaryMap){
+        for(auto & ball :* vec.second){
+            ballVec.at(i) = ball;
+            i++;
+        }
+    }
+    //乱序
+    std::random_shuffle(ballVec.begin(),ballVec.end());
+    //对count 前count位 按位置排序
+    count = m_step > count ? count:m_step;
+    auto itr = ballVec.begin();
+    for(int i = 0;i<count - 1;i++){
+        itr++;
+    }
+    std::sort(ballVec.begin(), itr,[](BallOrdinary* ball1,BallOrdinary* ball2){
+        return ball1->getPositionY()<ball2->getPositionY();
+    });
+    //特效
+    for(int i = 0;i<count-1;i++) {
+        auto ball = ballVec.at(i);
+        auto tempspr = Sprite::create("ui/xing1.png");
+        tempspr->setRotation(180);
+        tempspr->setPosition(cocos2d::Vec2(DESIGNX_TO_DESIGNX(100+40),visibleSize.height - DESIGNY_TO_DESIGNY(100)));
+        tempspr->setVisible(false);
+        tempspr->setAnchorPoint(cocos2d::Vec2::ANCHOR_MIDDLE);
+        tempspr->setScale(0.5f);
+        
+        
+        
+        
+        
+        
+    }
+    
+}
 void GameLayer::setStep(const int & step){
     m_step = step;
     m_touchAtlas->setString(cocos2d::StringUtils::format("%d",m_step));
+    //步数小于0
     if(m_step<=0){
         //this->removeFromParentAndCleanup(true);
     }
-}
-void GameLayer::onTouchCancelled(cocos2d::Touch* touch, cocos2d::Event* event){
-    this->selectCancelled();
 }
 void GameLayer::boomArea(cocos2d::Vec2 pointCenter,int grade){
     auto animation = cocos2d::AnimationCache::getInstance()->getAnimation("boomArea");
@@ -524,6 +580,7 @@ void GameLayer::ballSelectHelp(float dt){
     for(auto & ball:*selectHelpVec){
         ball->setIsSelect(true); //提示也用select图片了
     }
+    //一秒后图片变回未选定状态
     this->scheduleOnce(schedule_selector(GameLayer::ballSelectHelpClose),1.0f);
 }
 void GameLayer::ballSelectHelpClose(float dt){
@@ -591,7 +648,7 @@ void GameLayer::analyzeTileMap(){
         }
         cocos2d::ClippingNode* nodeClip = cocos2d::ClippingNode::create();
         nodeClip->addChild(cocos2d::LayerColor::create(cocos2d::Color4B(0, 1, 16, 200)));//球区 背景色
-        nodeClip->setContentSize(cocos2d::Size(visibleSize.height, 0));
+        //nodeClip->setContentSize(cocos2d::Size(visibleSize.height, 0));
         nodeClip->setAnchorPoint(cocos2d::Vec2::ANCHOR_BOTTOM_LEFT);
         cocos2d::DrawNode* stencil = cocos2d::DrawNode::create();
         stencil->drawPolygon(vecPois, numPois, cocos2d::Color4F(1, 0, 0, 1), 0.001, cocos2d::Color4F(0, 1, 0, 1));//不可见
