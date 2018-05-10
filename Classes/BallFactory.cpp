@@ -6,7 +6,7 @@
 //
 
 #include "BallFactory.h"
-std::unordered_map<int,std::vector<BallOrdinary*>*>* BallFactory::m_BallOrdinaryMap = new(std::nothrow) std::unordered_map<int,std::vector<BallOrdinary*>*>();
+std::map<int,std::vector<BallOrdinary*>*>* BallFactory::m_BallOrdinaryMap = new(std::nothrow) std::map<int,std::vector<BallOrdinary*>*>();
 BallOrdinary* BallFactory::getBallOrdinary(const int & type){
     BallOrdinary* ball = nullptr;
     auto itr = m_BallOrdinaryMap->find(type);//获取 这个type 的vector

@@ -16,7 +16,7 @@ public:
     static BallOrdinary* getBallOrdinary(const int & type); //取出一个球
     static void revertBall(BallOrdinary * ball);            //返回一个球
 private:
-    static std::unordered_map<int,std::vector<BallOrdinary*>*>* m_BallOrdinaryMap; //球map
+    static std::map<int,std::vector<BallOrdinary*>*>* m_BallOrdinaryMap; //球map
 };
 
 #endif /* BallFactory_hpp */

@@ -52,6 +52,7 @@
 		5A69D372209FF9B400CECD9C /* TargetShowLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A69D370209FF9B400CECD9C /* TargetShowLayer.cpp */; };
 		5A7993922094241600692E42 /* game_word in Resources */ = {isa = PBXBuildFile; fileRef = 5A7993902094241600692E42 /* game_word */; };
 		5A79939420942F8600692E42 /* effect in Resources */ = {isa = PBXBuildFile; fileRef = 5A79939320942F8600692E42 /* effect */; };
+		5AB272B320A3D44000036BCF /* GameOverShowLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5AB272B220A3D44000036BCF /* GameOverShowLayer.cpp */; };
 		5AF283792093222B00769953 /* PauseLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5AF283772093222B00769953 /* PauseLayer.cpp */; };
 		5AFBA6DA208EDE0700B9F9EA /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5AFBA6CB208EDE0400B9F9EA /* AppDelegate.cpp */; };
 		5AFBA6DB208EDE0700B9F9EA /* CKF_Sound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5AFBA6CC208EDE0400B9F9EA /* CKF_Sound.cpp */; };
@@ -165,6 +166,8 @@
 		5A69D371209FF9B400CECD9C /* TargetShowLayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TargetShowLayer.h; sourceTree = "<group>"; };
 		5A7993902094241600692E42 /* game_word */ = {isa = PBXFileReference; lastKnownFileType = folder; path = game_word; sourceTree = "<group>"; };
 		5A79939320942F8600692E42 /* effect */ = {isa = PBXFileReference; lastKnownFileType = folder; path = effect; sourceTree = "<group>"; };
+		5AB272B020A3D43F00036BCF /* GameOverShowLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameOverShowLayer.h; sourceTree = "<group>"; };
+		5AB272B220A3D44000036BCF /* GameOverShowLayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameOverShowLayer.cpp; sourceTree = "<group>"; };
 		5AF283772093222B00769953 /* PauseLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PauseLayer.cpp; sourceTree = "<group>"; };
 		5AF283782093222B00769953 /* PauseLayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PauseLayer.h; sourceTree = "<group>"; };
 		5AFBA6CB208EDE0400B9F9EA /* AppDelegate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppDelegate.cpp; sourceTree = "<group>"; };
@@ -330,6 +333,8 @@
 		46880B8319C43A87006E1F66 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				5AB272B220A3D44000036BCF /* GameOverShowLayer.cpp */,
+				5AB272B020A3D43F00036BCF /* GameOverShowLayer.h */,
 				5AFBA6CB208EDE0400B9F9EA /* AppDelegate.cpp */,
 				5AFBA6D8208EDE0700B9F9EA /* AppDelegate.h */,
 				5AFBA6CC208EDE0400B9F9EA /* CKF_Sound.cpp */,
@@ -560,6 +565,7 @@
 				5A08D0D8209015A8009C9278 /* BallOrdinary.cpp in Sources */,
 				5AF283792093222B00769953 /* PauseLayer.cpp in Sources */,
 				5AFBA6DA208EDE0700B9F9EA /* AppDelegate.cpp in Sources */,
+				5AB272B320A3D44000036BCF /* GameOverShowLayer.cpp in Sources */,
 				5AFBA6DE208EDE0700B9F9EA /* GameLayer.cpp in Sources */,
 				503AE10217EB989F00D1A890 /* RootViewController.mm in Sources */,
 				5AFBA6DD208EDE0700B9F9EA /* OpenAnimationLayer.cpp in Sources */,

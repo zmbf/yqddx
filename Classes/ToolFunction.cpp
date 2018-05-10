@@ -40,7 +40,7 @@ cocos2d::Animation* ToolFunction::createFrameAnimation(int indexStar,int indexEn
     }
     return animation;
 }
-inline void ToolFunction::calculateDeltaTimeFunc(std::string id){
+void ToolFunction::calculateDeltaTimeFunc(std::string id){
 #if COCOS2D_DEBUG > 0
     auto now = std::chrono::steady_clock::now();
     auto _deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(now - _lastUpdate).count();

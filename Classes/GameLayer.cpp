@@ -551,7 +551,9 @@ void GameLayer::supplyBall(const int & count){
                 pos .x -= 100;
         }
         int type = getRandBallType();//获取要补充的type
+        calculateDeltaTime("1");
         auto ball = BallFactory::getBallOrdinary(type);
+        calculateDeltaTime("2");
         (*m_BallOrdinaryMap->find(type)).second->push_back(ball);
         ball->setPosition(DESIGN_TO_DESIGN(pos));
         m_ballBatchNode->addChild(ball);
