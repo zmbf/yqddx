@@ -123,6 +123,7 @@ private:
         cocos2d::ui::ImageView* image;  //图片
         cocos2d::ui::TextAtlas* number;//达成目标数
         cocos2d::ui::ImageView* reachImage; //达成图片
+        int needCount;
         int ballType;
     };
     std::vector<targetAssemble*>* m_targetAssemble;

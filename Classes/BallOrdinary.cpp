@@ -28,7 +28,7 @@ bool BallOrdinary::init(const int & type){
     }else{
         Sprite::initWithFile(fileName);
     }
-    auto material = cocos2d::PhysicsMaterial(1,0,0);
+    auto material = cocos2d::PhysicsMaterial(0.01,0,0);
     auto body = cocos2d::PhysicsBody::createCircle(this->getContentSize().width*0.5 ,material);
     body->setRotationEnable(false);//关闭旋转
     this->setPhysicsBody(body);
@@ -85,6 +85,7 @@ void BallOrdinary::eliminate(const std::function<void(void)> & callback){
     auto eliminateAct = JsonEffectFactory::getBalleliminateAct(this->getParent(),this->getLocalZOrder()+1);
     eliminateAct->node->setPosition(this->getPosition());
     CKF_Sound::playEffect("01");
+    this->getPhysicsBody()->setEnabled(false);
     this->runAction(cocos2d::Sequence::create(cocos2d::ScaleTo::create(0.4f,0.0f),cocos2d::CallFuncN::create([=](cocos2d::Ref*ref){
         auto node = static_cast<cocos2d::Node*>(ref);
         node->setVisible(false);

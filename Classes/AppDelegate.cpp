@@ -141,6 +141,10 @@ bool AppDelegate::applicationDidFinishLaunching() {
     condition.mode = XDLCAppMissionSucessConditionMode::AppSucessConditionMode_mustReached;
     m_missionSuccess.insert(std::pair<std::string,sXDLCMissionSuccessCondition>(condition.valueVar,condition));
     
+    /*
+     合图加载
+     */
+    SpriteFrameCache::getInstance()->addSpriteFramesWithFile("ui/textures/merger/ball.plist");
     // create a scene. it's an autorelease object
     auto scene = GameLayer::createScene(data);
     

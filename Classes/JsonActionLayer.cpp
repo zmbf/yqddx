@@ -99,7 +99,7 @@ Node* JsonActionLayer::createTuoWeiEffect(int k){
                 _emitter->setLife(0.5);
                 _emitter->setLifeVar(0.2);
                 _emitter->setTotalParticles(10);
-                _emitter->setTexture(Director::getInstance()->getTextureCache()->addImage("ui/xing1.png"));
+                _emitter->setTexture(Director::getInstance()->getTextureCache()->addImage("ui/textures/xing1.png"));
                 _emitter->setStartColor(Color4F(Color4B(255, 245, 165, 255)));
                 _emitter->setStartColorVar(Color4F(Color4B(0, 0, 0, 100)));
                 _emitter->setEndColor(Color4F(Color4B(255, 245, 165, 0)));
@@ -117,7 +117,7 @@ Node* JsonActionLayer::createTuoWeiEffect(int k){
                 _emitter->setLife(0.5);
                 _emitter->setLifeVar(0.2);
                 _emitter->setTotalParticles(10);
-                _emitter->setTexture(Director::getInstance()->getTextureCache()->addImage("ui/kongxing.png"));
+                _emitter->setTexture(Director::getInstance()->getTextureCache()->addImage("ui/textures/kongxing.png"));
                 _emitter->setStartColor(Color4F(Color4B(255, 245, 165, 255)));
                 _emitter->setStartColorVar(Color4F(Color4B(0, 0, 0, 100)));
                 _emitter->setEndColor(Color4F(Color4B(255, 245, 165, 0)));
@@ -131,7 +131,7 @@ Node* JsonActionLayer::createTuoWeiEffect(int k){
                 
                 break;
             default:
-                _emitter->setTexture(Director::getInstance()->getTextureCache()->addImage("ui/xing1.png"));
+                _emitter->setTexture(Director::getInstance()->getTextureCache()->addImage("ui/textures/xing1.png"));
                 break;
         }
         

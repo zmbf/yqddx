@@ -3,3 +3,5 @@ cocos2d
 proj.android-studio
 proj.ios_mac/yqddx.xcodeproj/project.xcworkspace/xcuserdata/xdlc.xcuserdatad/UserInterfaceState.xcuserstate
 bin
+.svn
+.idea

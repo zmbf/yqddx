@@ -16,10 +16,10 @@ void TargetShowLayer::onEnterTransitionDidFinish(){
     cocos2d::Layer::onEnterTransitionDidFinish();
     //加载UI数据
     if(!m_root){
-        m_root = static_cast<cocos2d::ui::Widget*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile("ui/game_ui/Blue_Internal_4/Blue_Internal_4.json"));
+        m_root = static_cast<cocos2d::ui::Widget*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile("ui/game_ui/Blue_Internal_4/Blue_Internal_4.ExportJson"));
         for(int i = 0;i<3;i++){
-             m_imageAim[i] = static_cast<cocos2d::ui::ImageView*>(m_root->getChildByName("Image_mubiao")->getChildByName(cocos2d::StringUtils::format("Image_%d",i+1)));
-             m_atlasAim[i] = static_cast<cocos2d::ui::TextAtlas*>(m_root->getChildByName("Image_mubiao")->getChildByName(cocos2d::StringUtils::format("AtlasLabel_%d",i+7)));
+             m_imageAim[i] = static_cast<cocos2d::ui::ImageView*>(m_root->getChildByName("Panel_1")->getChildByName(cocos2d::StringUtils::format("Image_%d",i+1)));
+             m_atlasAim[i] = static_cast<cocos2d::ui::TextAtlas*>(m_root->getChildByName("Panel_1")->getChildByName(cocos2d::StringUtils::format("AtlasLabel_%d",i+7)));
         }
          m_btnFull = static_cast<cocos2d::ui::Button*>( m_root->getChildByName("Button_quanpingguanbi"));
          m_btnFull->addClickEventListener(CC_CALLBACK_0(TargetShowLayer::onBtnClose,this));
@@ -30,10 +30,27 @@ void TargetShowLayer::onEnterTransitionDidFinish(){
 }
 void TargetShowLayer::onBtnClose(){
     m_btnFull->setTouchEnabled(false);
-    auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("aimBroad/Blue_Internal_4.json", "Animation0");
+    auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("aimBroad/Blue_Internal_4.ExportJson", "Animation_mb1");
     act->play(cocos2d::CallFunc::create([this](){
-        this->setVisible(false);
+        cocos2d::Director::getInstance()->getEventDispatcher()->dispatchCustomEvent("target_0");
     }));
+    
+    act = cocostudio::ActionManagerEx::getInstance()->getActionByName("aimBroad/Blue_Internal_4.ExportJson", "Animation_mb2");
+    act->play(cocos2d::CallFunc::create([this](){
+        cocos2d::Director::getInstance()->getEventDispatcher()->dispatchCustomEvent("target_1");
+    }));
+    
+    act = cocostudio::ActionManagerEx::getInstance()->getActionByName("aimBroad/Blue_Internal_4.ExportJson", "Animation_mb3");
+    act->play(cocos2d::CallFunc::create([this](){
+        cocos2d::Director::getInstance()->getEventDispatcher()->dispatchCustomEvent("target_2");
+        auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("aimBroad/Blue_Internal_4.ExportJson", "Animation0");
+        act->play(cocos2d::CallFunc::create([this](){this->removeFromParent();}));
+    }));
+    
+//    auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("aimBroad/Blue_Internal_4.ExportJson", "Animation0");
+//    act->play(cocos2d::CallFunc::create([this](){
+//        this->setVisible(false);
+//    }));
 }
 void TargetShowLayer::onShow(std::map<std::string, sXDLCMissionSuccessCondition> missionSuccess){
     this->setVisible(true);
@@ -52,20 +69,20 @@ void TargetShowLayer::onShow(std::map<std::string, sXDLCMissionSuccessCondition>
         }else if(!condition.second.valueVar.compare("PurpleCount")){
             type = 5;
         }
-        std::string fileName = cocos2d::StringUtils::format("ball%d-1.png", type);
+        std::string fileName = cocos2d::StringUtils::format("gsc_sjta_%d.png", type);
         auto frame = cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(fileName);
         if(frame){
             m_imageAim[i]->loadTexture(fileName,cocos2d::ui::TextureResType::PLIST);
         }else{
             m_imageAim[i]->loadTexture(fileName);
         }
+        m_imageAim[i]->setVisible(true);
+        m_imageAim[i]->setOpacity(255);
         m_atlasAim[i]->setString(condition.second.limitedValue.c_str());
         i++;
     }
-
-    auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("aimBroad/Blue_Internal_4.json", "Animation1");
-    act->play(cocos2d::CallFunc::create([=](){
-        m_btnFull->setTouchEnabled(true);
-    }));
+    m_btnFull->setTouchEnabled(true);
+    auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("aimBroad/Blue_Internal_4.ExportJson", "Animation1");
+    act->play();
 }
 

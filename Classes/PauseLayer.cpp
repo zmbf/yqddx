@@ -17,7 +17,7 @@ PauseLayer::PauseLayer(){
 void PauseLayer::onEnterTransitionDidFinish(){
     cocos2d::Layer::onEnterTransitionDidFinish();
     if(!m_root){
-        m_root = static_cast<cocos2d::ui::Layout*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile("ui/game_ui/pause/json_Pause.json"));
+        m_root = static_cast<cocos2d::ui::Layout*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile("ui/game_ui/pause/json_Pause.ExportJson"));
         this->addChild(m_root);
         CKF_Sound::playEffect(pauseSound);
         auto bg = static_cast<cocos2d::ui::ImageView*>(m_root->getChildByName("Image_bg"));
@@ -118,12 +118,14 @@ void PauseLayer::effect(){
 
 void PauseLayer::onBtnHelp(void)
 {
-    cocos2d::ui::Widget* root = static_cast<cocos2d::ui::Widget*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile("ui/game_ui/json_item_property_pause/json_item_property_pause.json"));
+    cocos2d::ui::Widget* root = static_cast<cocos2d::ui::Widget*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile("ui/game_ui/json_item_property_pause/json_item_property_pause.ExportJson"));
     cocos2d::ui::Button* btnFull = static_cast<cocos2d::ui::Button*>(root->getChildByName("Button_close_kuangwai"));
     cocos2d::ui::Button* btnClose = static_cast<cocos2d::ui::Button*>(root->getChildByName("Image_bg")->getChildByName("Button_close"));
     this->addChild(root, 2);
     auto closeCallBack = [root](Ref* ref){
         root->removeFromParent();
+        cocos2d::Director::getInstance()->getTextureCache()->removeTextureForKey("ui/game_ui/json_item_property_pause/json_item_property_pause0.png");
+        cocos2d::SpriteFrameCache::getInstance()->removeSpriteFramesFromFile("ui/game_ui/json_item_property_pause/json_item_property_pause0.plist");
     };
     btnFull->addClickEventListener(closeCallBack);
     btnClose->addClickEventListener(closeCallBack);

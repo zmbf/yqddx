@@ -7,25 +7,34 @@
 
 #include "BallFactory.h"
 std::vector<std::vector<BallOrdinary*>*>* BallFactory::m_BallOrdinaryMap = new(std::nothrow) std::vector<std::vector<BallOrdinary*>*>(BALLTYPECOUNT);
-BallOrdinary* BallFactory::getBallOrdinary(const int & type){
-    BallOrdinary* ball = nullptr;
+void BallFactory::initBallOrdinary(const int & count,const int & type){
     auto list = m_BallOrdinaryMap->at(type);//获取 这个type 的vector
     if(!list){
         list = new(std::nothrow) std::vector<BallOrdinary*>();
         list->reserve(MAXBALLCOUNT);
         m_BallOrdinaryMap->at(type) = list;
     }
-    if(list->empty()){
-        ball = BallOrdinary::create(type);
+    for(int i =0;i<count;i++){
+        auto ball = BallOrdinary::create(type);
         ball->retain();
-    }else{
-        ball = list->back();
-        list->pop_back();
+        ball->pause();
+        ball->getPhysicsBody()->setEnabled(false);
+        list->push_back(ball);
     }
+}
+BallOrdinary* BallFactory::getBallOrdinary(const int & type){
+    auto list = m_BallOrdinaryMap->at(type);//获取 这个type 的vector
+    if(!list||list->empty()){
+        BallFactory::initBallOrdinary(1,type);
+    }
+    auto ball = list->back();
+    list->pop_back();
+    
     ball->setVisible(true);
     ball->m_isInUse = true;
     ball->resume();
     ball->getPhysicsBody()->setEnabled(true);
+    
     return ball;
 }
 void BallFactory::revertBall(BallOrdinary * ball){

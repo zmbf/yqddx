@@ -17,7 +17,7 @@ void OpenAnimationLayer::onEnter(){
     m_iAction = -1;
     
     
-    cocos2d::ui::Widget* rootNode = static_cast<cocos2d::ui::Widget*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile("ui/OpenAnimation/NewUi_1.json"));
+    cocos2d::ui::Widget* rootNode = static_cast<cocos2d::ui::Widget*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile("ui/OpenAnimation/NewUi_1.ExportJson"));
     this->addChild(rootNode);
     m_btn_kongbai = static_cast<cocos2d::ui::Button*>(rootNode->getChildByName("Button_kongbaitu"));
     m_img_beijing = static_cast<cocos2d::ui::ImageView*>(rootNode->getChildByName("Image_beijing"));
