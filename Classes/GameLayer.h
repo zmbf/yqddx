@@ -30,6 +30,7 @@ private:
     void setStep(const int & step); //设置步数
     inline const int & getStep(){return m_step;};//获取步数
     void gameSuccess();//游戏成功
+    void gameFaild();
     bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
     void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
     void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);
@@ -109,6 +110,8 @@ private:
     cocos2d::Node* m_ballBatchNode; //球的父节点  
     cocos2d::ui::Layout* m_exitLayer;  //退出界面
     PauseLayer* m_pauseLayer; //暂停界面
+    cocos2d::ui::Layout*  m_reliveLayer; //复活界面
+    cocos2d::ui::Layout*  m_faild;
     GameOverShowLayer * m_gameOverShowLayer;
     cocos2d::ui::Button* m_pauseButton; //暂停按钮
     TargetShowLayer * m_targetshowLayer;
@@ -123,6 +126,7 @@ private:
         cocos2d::ui::ImageView* image;  //图片
         cocos2d::ui::TextAtlas* number;//达成目标数
         cocos2d::ui::ImageView* reachImage; //达成图片
+        int showNumber;
         int needCount;
         int ballType;
     };

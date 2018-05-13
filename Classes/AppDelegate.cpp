@@ -119,7 +119,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     sXDLCMissionSuccessCondition condition = sXDLCMissionSuccessCondition();
     condition.conditionName = "消除蓝色球";
     condition.soperator = ">=";
-    condition.limitedValue = "45";
+    condition.limitedValue = "2";
     condition.valueVar ="BlueCount";
     condition.isLastGot = false;
     condition.mode = XDLCAppMissionSucessConditionMode::AppSucessConditionMode_mustReached;
@@ -127,7 +127,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     
     condition.conditionName = "消除红色球";
     condition.soperator = ">=";
-    condition.limitedValue = "45";
+    condition.limitedValue = "2";
     condition.valueVar ="RedCount";
     condition.isLastGot = false;
     condition.mode = XDLCAppMissionSucessConditionMode::AppSucessConditionMode_mustReached;
@@ -135,7 +135,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     
     condition.conditionName = "消除蓝色球";
     condition.soperator = ">=";
-    condition.limitedValue = "45";
+    condition.limitedValue = "2";
     condition.valueVar ="YellowCount";
     condition.isLastGot = false;
     condition.mode = XDLCAppMissionSucessConditionMode::AppSucessConditionMode_mustReached;

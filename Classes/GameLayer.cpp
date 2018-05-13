@@ -91,6 +91,7 @@ bool GameLayer::init(){
     m_touchListen = nullptr;
     m_pauseLayer = nullptr;
     m_exitLayer = nullptr;
+    m_reliveLayer = nullptr;
     m_gameOverShowLayer = nullptr;
     m_targetshowLayer = nullptr;
     m_targetAssemble = nullptr;
@@ -236,6 +237,8 @@ void GameLayer::initTargetUI(){
             
             target->number->setString(condition.second.limitedValue.c_str());
             target->needCount = std::atoi(condition.second.limitedValue.c_str());
+            target->showNumber = target->needCount;
+            
             target->reachImage->setVisible(false);
             if(!condition.second.valueVar.compare("RedCount")){
                 target->ballType = 1;
@@ -271,6 +274,7 @@ void GameLayer::initTargetUI(){
             targetAssemble* target = m_targetAssemble->at(i);
             target->number->setString(condition.second.limitedValue.c_str());
             target->needCount = std::atoi(condition.second.limitedValue.c_str());
+            target->showNumber = target->needCount;
             target->reachImage->setVisible(false);
             if(!condition.second.valueVar.compare("RedCount")){
                 target->ballType = 1;
@@ -293,6 +297,7 @@ void GameLayer::initTargetUI(){
             target->image->setVisible(false);
             target->reachImage->setVisible(false);
             target->number->setVisible(false);
+    
             i++;
         }
     }
@@ -346,8 +351,8 @@ float GameLayer::removeSelectBall(std::vector<BallOrdinary*> & vec){
             for(auto & target : * m_targetAssemble){
                 //目标数减一
                 if(ball->getType()==target->ballType){
-                    if(target->needCount > 0){
-                        target->needCount--;
+                    if(target->showNumber>0){
+                        target->showNumber--;
                         //飞向 目标动作
                         std::string fileName = cocos2d::StringUtils::format("gsc_sjta_%d.png",target->ballType);
                         auto sp = Sprite::create(fileName);
@@ -355,24 +360,12 @@ float GameLayer::removeSelectBall(std::vector<BallOrdinary*> & vec){
                         sp->setPosition(ball->getPosition());
                         auto bezierto = ToolFunction::getBzier(sp->getPosition(),target->image->getParent()->convertToWorldSpace(target->image->getPosition()),0,1.0f);
                         sp->runAction(cocos2d::Sequence::create(bezierto,cocos2d::DelayTime::create(0.1f),cocos2d::CallFunc::create([&target](){
-                            target->number->setString(cocos2d::StringUtils::format("%d",target->needCount));
-                            if(target->needCount==0){
+                            auto number = atoi(target->number->getString().c_str())-1;
+                            target->number->setString(cocos2d::StringUtils::format("%d",number));
+                            if(number==0){
                                 target->reachImage->setVisible(true);
                             }
                         }),cocos2d::RemoveSelf::create(),nullptr));
-                       
-                        //检测游戏是否胜利
-                        int count = sizeof(m_targetAssemble[0])/sizeof(m_targetAssemble);
-                        for(int j = 0;j< count ;j++){
-                            auto & target = m_targetAssemble->at(j);
-                            if(target->needCount>0){
-                                break;
-                            }
-                            if( j ==  count - 1 ){
-                                //游戏胜利
-                                this->gameSuccess();
-                            }
-                        }
                     }
                     break;
                 }
@@ -425,17 +418,49 @@ void GameLayer::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event){
             int x = 10 * i;
             score += x;
         }
+        
         //分数标签  有对应球的type
         auto label =cocos2d::ui::TextAtlas::create(cocos2d::StringUtils::format("%d",score),cocos2d::StringUtils::format("fonts/gsc_szbq_%d.png",m_BallOrdinarySelect->at(0)->getType()), 29, 39, "0");
         //根据消除球数量 放大label
         float scale = 0.5+(m_BallOrdinarySelect->size()-2)*0.05;
         scale = scale>1.5?1.5:scale;
         label->setScale(scale);
-        
         label->setPosition(m_BallOrdinarySelect->at(0)->getPosition());
         this->addChild(label,c_mUiLocalZorder);
         label->runAction(cocos2d::Sequence::create(cocos2d::MoveBy::create(1.0f,cocos2d::Vec2(0,100)),cocos2d::RemoveSelf::create(), nullptr));
-        auto startPosition = m_BallOrdinarySelect->at(0)->getPosition();
+        //结果判断 检测游戏是否胜利
+        for(auto & ball : * m_BallOrdinarySelect ){
+            for(auto & target : * m_targetAssemble){
+                //目标数减一
+                if(ball->getType()==target->ballType&&target->needCount>0){
+                    target->needCount--;
+                    //检测游戏是否胜利
+                    int count =(int) m_targetAssemble->size();
+                    for(int j = 0;j< count ;j++){
+                        auto & target = m_targetAssemble->at(j);
+                        if(target->needCount>0){
+                            break;
+                        }
+                        if( j ==  count - 1 ){
+                            //游戏胜利
+                            this->gameSuccess();
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        if(this->getStep()<=0){//失败判定
+            int count =(int)m_targetAssemble->size();
+            for(int j = 0;j< count ;j++){
+                auto & target = m_targetAssemble->at(j);
+                if(target->needCount>0){
+                    this->gameFaild();
+                    break;
+                }
+            }
+            
+        }
         int size =(int)m_BallOrdinarySelect->size();
         float delta = removeSelectBall(*m_BallOrdinarySelect);//移除被选的球 返回需要的延时
         //鼓励语  每8个加一个等级 所有球移除 播放
@@ -451,6 +476,118 @@ void GameLayer::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event){
 }
 void GameLayer::onTouchCancelled(cocos2d::Touch* touch, cocos2d::Event* event){
     this->selectCancelled();
+}
+void GameLayer::gameFaild(){
+    //取消touch监听
+    _eventDispatcher->removeEventListener(m_touchListen);
+    if(!m_reliveLayer){
+        m_reliveLayer = static_cast<cocos2d::ui::Layout*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile("ui/game_ui/relive/json_fuhuo.ExportJson"));
+        m_reliveLayer->retain();
+        auto closeBtn = static_cast<cocos2d::ui::Button*>(m_reliveLayer->getChildByName("Panel_1")->getChildByName("Button_close"));
+        closeBtn->addClickEventListener([this](cocos2d::Ref*ref){
+            auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("ui/game_ui/relive/json_fuhuo.ExportJson", "Animation_out");
+            act->play(cocos2d::CallFunc::create([this](){
+                m_reliveLayer->removeFromParent();
+                if(!m_faild){
+                    m_faild = static_cast<cocos2d::ui::Layout*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile("ui/game_ui/fail/json_point_lose.ExportJson"));
+                    m_faild->retain();
+                    auto closeBtn = static_cast<cocos2d::ui::Button*>(m_faild->getChildByName("Panel_1")->getChildByName("Button_guanbi"));
+                    closeBtn->addClickEventListener([this](cocos2d::Ref* ref){
+                        auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("ui/game_ui/fail/json_point_lose.ExportJson","Animation_out");
+                        act->play(cocos2d::CallFunc::create([this](){
+                            m_faild->removeFromParent();
+                        }));
+                    });
+                    auto againBtn = static_cast<cocos2d::ui::Button*>(m_faild->getChildByName("Panel_1")->getChildByName("Button_again"));
+                    againBtn->addClickEventListener([this](cocos2d::Ref*ref){
+                        //重来一次
+                        auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("ui/game_ui/fail/json_point_lose.ExportJson","Animation_out");
+                        act->play(cocos2d::CallFunc::create([this](){
+                            m_faild->removeFromParent();
+                            //auto gameLayer = static_cast<GameLayer*>(cocos2d::Director::getInstance()->getRunningScene()->getChildByName("gameLayer"));
+                            auto data = this->getData();
+                            this->removeFromParent();
+                            auto scene = GameLayer::createScene(data);
+                            cocos2d::Director::getInstance()->replaceScene(scene);
+                        }));
+                    });
+                }
+                auto touch = cocos2d::EventListenerTouchOneByOne::create();
+                touch->setSwallowTouches(true);
+                touch->onTouchBegan = [](cocos2d::Touch* touch, cocos2d::Event* event){
+                    return true;
+                };
+                
+                cocos2d::Director::getInstance()->getRunningScene()->addChild(m_faild);
+                m_faild->getChildByName("Panel_1")->setScale(1.0f);
+                cocos2d::Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touch,m_faild);
+                
+                static_cast<cocos2d::ui::Button*>(m_faild->getChildByName("Panel_1")->getChildByName("Button_again"))->setTouchEnabled(false);
+                static_cast<cocos2d::ui::Button*>(m_faild->getChildByName("Panel_1")->getChildByName("Button_guanbi"))->setTouchEnabled(false);
+                auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("ui/game_ui/fail/json_point_lose.ExportJson","Animation_in");
+                act->play(cocos2d::CallFunc::create([this](){
+                    static_cast<cocos2d::ui::Button*>(m_faild->getChildByName("Panel_1")->getChildByName("Button_again"))->setTouchEnabled(true);
+                    static_cast<cocos2d::ui::Button*>(m_faild->getChildByName("Panel_1")->getChildByName("Button_guanbi"))->setTouchEnabled(true);
+                }));
+            }));
+        });
+        
+        auto buyBtn = static_cast<cocos2d::ui::Button*>(m_reliveLayer->getChildByName("Panel_1")->getChildByName("Button_buy"));
+        buyBtn->addClickEventListener([this](cocos2d::Ref*ref){
+            auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("ui/game_ui/relive/json_fuhuo.ExportJson", "Animation_out");
+            act->play(cocos2d::CallFunc::create([this](){
+                m_reliveLayer->removeFromParent();
+                this->setStep(this->getStep()+5);
+                _eventDispatcher->addEventListenerWithSceneGraphPriority(m_touchListen, this);//开启touch监听
+            }));
+        });
+        
+    }
+    //吞噬触摸
+    auto touch = cocos2d::EventListenerTouchOneByOne::create();
+    touch->setSwallowTouches(true);
+    touch->onTouchBegan = [](cocos2d::Touch* touch, cocos2d::Event* event){
+        return true;
+    };
+    cocos2d::Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touch,m_reliveLayer);
+    
+    cocos2d::Director::getInstance()->getRunningScene()->addChild(m_reliveLayer);
+    for(int i = 0;i<m_targetAssemble->size();i++){
+        auto image = static_cast<cocos2d::ui::ImageView*>(m_reliveLayer->getChildByName("Panel_1")->getChildByName(cocos2d::StringUtils::format("Panel_Frame_%d",i+3))->getChildByName(cocos2d::StringUtils::format("Image_%d",i+1)));
+        auto number = static_cast<cocos2d::ui::TextAtlas*>(m_reliveLayer->getChildByName("Panel_1")->getChildByName(cocos2d::StringUtils::format("Panel_Frame_%d",i+3))->getChildByName("AtlasLabel_1"));
+        auto reachImage = static_cast<cocos2d::ui::ImageView*>(m_reliveLayer->getChildByName("Panel_1")->getChildByName(cocos2d::StringUtils::format("Panel_Frame_%d",i+3))->getChildByName(cocos2d::StringUtils::format("Image_2%d",i+3)));
+        std::string fileName = cocos2d::StringUtils::format("gsc_sjta_%d.png", m_targetAssemble->at(i)->ballType);
+        auto frame = cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(fileName);
+        if(frame){
+            image->loadTexture(fileName,cocos2d::ui::TextureResType::PLIST);
+        }else{
+            image->loadTexture(fileName);
+        }
+        number->setString(cocos2d::StringUtils::format("%d",m_targetAssemble->at(i)->needCount));
+        number->setVisible(true);
+        if(m_targetAssemble->at(i)->needCount == 0){
+            reachImage->setVisible(true);
+            number->setVisible(false);
+        }else{
+            reachImage->setVisible(false);
+        }
+    }
+    
+    static_cast<cocos2d::ui::Button*>(m_reliveLayer->getChildByName("Panel_1")->getChildByName("Button_close"))->setTouchEnabled(false);
+    static_cast<cocos2d::ui::Button*>(m_reliveLayer->getChildByName("Panel_1")->getChildByName("Button_buy"))->setTouchEnabled(false);
+    m_reliveLayer->setVisible(true);
+
+    auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("ui/game_ui/relive/json_fuhuo.ExportJson", "Animation_in");
+    act->play(cocos2d::CallFunc::create([this](){
+        static_cast<cocos2d::ui::Button*>(m_reliveLayer->getChildByName("Panel_1")->getChildByName("Button_close"))->setTouchEnabled(true);
+        static_cast<cocos2d::ui::Button*>(m_reliveLayer->getChildByName("Panel_1")->getChildByName("Button_buy"))->setTouchEnabled(true);
+        auto act = cocostudio::ActionManagerEx::getInstance()->getActionByName("ui/game_ui/relive/json_fuhuo.ExportJson", "Animation0");
+        act->setLoop(true);
+        act->play();
+    }));
+    
+    
+    
 }
 void GameLayer::gameSuccess(){
     //取消touch监听
@@ -483,11 +620,10 @@ void GameLayer::gameSuccess(){
     }
     //乱序
     std::random_shuffle(ballVec->begin(),ballVec->end());
-    //对count 前count位 按位置排序
+    //对count 后count位 按位置排序
     count = m_step > count ? count:m_step;
     auto itr = ballVec->end();
-    
-    for(int i = 0;i<count - 1;i++){
+    for(int i = 0;i<count;i++){
         itr--;
     }
     std::sort(itr,ballVec->end(),[](BallOrdinary* ball1,BallOrdinary* ball2){
@@ -597,10 +733,6 @@ void GameLayer::gameSuccess(){
 void GameLayer::setStep(const int & step){
     m_step = step;
     m_touchAtlas->setString(cocos2d::StringUtils::format("%d",m_step));
-    //步数小于0
-    if(m_step<=0){
-        //this->removeFromParentAndCleanup(true);
-    }
 }
 void GameLayer::boomArea(cocos2d::Vec2 pointCenter,int grade){
     auto animation = cocos2d::AnimationCache::getInstance()->getAnimation("boomArea");

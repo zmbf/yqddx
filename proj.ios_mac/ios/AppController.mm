@@ -27,7 +27,8 @@
 #import "cocos2d.h"
 #import "AppDelegate.h"
 #import "RootViewController.h"
-
+#import <sys/utsname.h>
+#import <Foundation/Foundation.h>
 @implementation AppController
 
 @synthesize window;
@@ -78,7 +79,11 @@ static AppDelegate s_sharedApplication;
     
     //run the cocos2d-x game scene
     app->run();
-
+    struct utsname systemInfo;
+    uname(&systemInfo);
+    NSString *platform = [NSString stringWithCString:systemInfo.machine
+                                            encoding:NSUTF8StringEncoding];
+    NSLog(@"%@", platform);
     return YES;
 }
 
